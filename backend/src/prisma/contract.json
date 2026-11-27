@@ -16,12 +16,12 @@
       "model": "PaymentEvent",
       "namespace": "public"
     },
-    "User": {
-      "model": "User",
+    "Product": {
+      "model": "Product",
       "namespace": "public"
     },
-    "product": {
-      "model": "product",
+    "User": {
+      "model": "User",
       "namespace": "public"
     }
   },
@@ -34,7 +34,7 @@
               "amountCents": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/float8@1",
+                  "codecId": "pg/int4@1",
                   "kind": "scalar"
                 }
               },
@@ -55,13 +55,6 @@
                   "kind": "scalar"
                 }
               },
-              "orderId": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
               "productId": {
                 "nullable": false,
                 "type": {
@@ -75,7 +68,7 @@
                   "codecId": "pg/enum@1",
                   "kind": "scalar",
                   "typeParams": {
-                    "typeName": "status"
+                    "typeName": "OrderStatus"
                   }
                 }
               },
@@ -88,9 +81,49 @@
                     "precision": 3
                   }
                 }
+              },
+              "userId": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
               }
             },
-            "relations": {},
+            "relations": {
+              "product": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "productId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Product",
+                  "namespace": "public"
+                }
+              },
+              "user": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "userId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "User",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "amountCents": {
@@ -102,9 +135,6 @@
                 "id": {
                   "column": "id"
                 },
-                "orderId": {
-                  "column": "orderId"
-                },
                 "productId": {
                   "column": "productId"
                 },
@@ -113,6 +143,9 @@
                 },
                 "updatedAt": {
                   "column": "updatedAt"
+                },
+                "userId": {
+                  "column": "userId"
                 }
               },
               "namespaceId": "public",
@@ -160,7 +193,7 @@
                 }
               },
               "pixCode": {
-                "nullable": false,
+                "nullable": true,
                 "type": {
                   "codecId": "pg/text@1",
                   "kind": "scalar"
@@ -176,8 +209,11 @@
               "status": {
                 "nullable": false,
                 "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
+                  "codecId": "pg/enum@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "typeName": "PaymentStatus"
+                  }
                 }
               },
               "updatedAt": {
@@ -191,7 +227,24 @@
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "order": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "orderId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Order",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "createdAt": {
@@ -244,7 +297,7 @@
                   "codecId": "pg/enum@1",
                   "kind": "scalar",
                   "typeParams": {
-                    "typeName": "status"
+                    "typeName": "PaymentStatus"
                   }
                 }
               },
@@ -262,18 +315,45 @@
                   "kind": "scalar"
                 }
               },
+              "source": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/enum@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "typeName": "Source"
+                  }
+                }
+              },
               "toStatus": {
                 "nullable": false,
                 "type": {
                   "codecId": "pg/enum@1",
                   "kind": "scalar",
                   "typeParams": {
-                    "typeName": "status"
+                    "typeName": "PaymentStatus"
                   }
                 }
               }
             },
-            "relations": {},
+            "relations": {
+              "payment": {
+                "cardinality": "N:1",
+                "nullable": false,
+                "on": {
+                  "localFields": [
+                    "paymentId"
+                  ],
+                  "targetFields": [
+                    "id"
+                  ]
+                },
+                "to": {
+                  "model": "Payment",
+                  "namespace": "public"
+                }
+              }
+            },
             "storage": {
               "fields": {
                 "createdAt": {
@@ -288,6 +368,9 @@
                 "paymentId": {
                   "column": "paymentId"
                 },
+                "source": {
+                  "column": "source"
+                },
                 "toStatus": {
                   "column": "toStatus"
                 }
@@ -296,71 +379,7 @@
               "table": "PaymentEvent"
             }
           },
-          "User": {
-            "fields": {
-              "email": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "id": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "name": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "password": {
-                "nullable": false,
-                "type": {
-                  "codecId": "pg/text@1",
-                  "kind": "scalar"
-                }
-              },
-              "phone_number": {
-                "nullable": false,
-                "type": {
-                  "codecId": "sql/varchar@1",
-                  "kind": "scalar",
-                  "typeParams": {
-                    "length": 100
-                  }
-                }
-              }
-            },
-            "relations": {},
-            "storage": {
-              "fields": {
-                "email": {
-                  "column": "email"
-                },
-                "id": {
-                  "column": "id"
-                },
-                "name": {
-                  "column": "name"
-                },
-                "password": {
-                  "column": "password"
-                },
-                "phone_number": {
-                  "column": "phone_number"
-                }
-              },
-              "namespaceId": "public",
-              "table": "User"
-            }
-          },
-          "product": {
+          "Product": {
             "fields": {
               "active": {
                 "nullable": false,
@@ -428,7 +447,71 @@
                 }
               },
               "namespaceId": "public",
-              "table": "product"
+              "table": "Product"
+            }
+          },
+          "User": {
+            "fields": {
+              "email": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "id": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "name": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "password": {
+                "nullable": false,
+                "type": {
+                  "codecId": "pg/text@1",
+                  "kind": "scalar"
+                }
+              },
+              "phoneNumber": {
+                "nullable": false,
+                "type": {
+                  "codecId": "sql/varchar@1",
+                  "kind": "scalar",
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              }
+            },
+            "relations": {},
+            "storage": {
+              "fields": {
+                "email": {
+                  "column": "email"
+                },
+                "id": {
+                  "column": "id"
+                },
+                "name": {
+                  "column": "name"
+                },
+                "password": {
+                  "column": "password"
+                },
+                "phoneNumber": {
+                  "column": "phoneNumber"
+                }
+              },
+              "namespaceId": "public",
+              "table": "User"
             }
           }
         }
@@ -440,23 +523,46 @@
       "public": {
         "entries": {
           "native_enum": {
-            "status": {
+            "OrderStatus": {
               "kind": "postgres-enum",
               "members": [
-                "CART",
-                "AWAITING_SELLER_CONFIRMATION",
-                "CONFIRMED",
-                "REJECTED"
+                "PENDING",
+                "PAID",
+                "FAILED",
+                "CANCELED"
               ],
-              "typeName": "status"
+              "typeName": "OrderStatus"
+            },
+            "PaymentStatus": {
+              "kind": "postgres-enum",
+              "members": [
+                "PENDING",
+                "APPROVED",
+                "FAILED",
+                "EXPIRED",
+                "CANCELED",
+                "REFUNDED",
+                "DECLINED"
+              ],
+              "typeName": "PaymentStatus"
+            },
+            "Source": {
+              "kind": "postgres-enum",
+              "members": [
+                "WEBHOOK",
+                "POLLING",
+                "SIMULATION",
+                "SYSTEM"
+              ],
+              "typeName": "Source"
             }
           },
           "table": {
             "Order": {
               "columns": {
                 "amountCents": {
-                  "codecId": "pg/float8@1",
-                  "dataType": "pg/float8",
+                  "codecId": "pg/int4@1",
+                  "dataType": "pg/int4",
                   "nullable": false
                 },
                 "createdAt": {
@@ -476,11 +582,6 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
-                "orderId": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                },
                 "productId": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
@@ -491,11 +592,11 @@
                   "dataType": "pg/enum",
                   "nullable": false,
                   "typeParams": {
-                    "typeName": "status"
+                    "typeName": "OrderStatus"
                   },
                   "valueSet": {
                     "entityKind": "valueSet",
-                    "entityName": "status",
+                    "entityName": "OrderStatus",
                     "namespaceId": "public",
                     "plane": "storage"
                   }
@@ -507,9 +608,51 @@
                   "typeParams": {
                     "precision": 3
                   }
+                },
+                "userId": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
                 }
               },
-              "foreignKeys": [],
+              "foreignKeys": [
+                {
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "userId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Order"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "User"
+                  }
+                },
+                {
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "productId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Order"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Product"
+                  }
+                }
+              ],
               "indexes": [],
               "primaryKey": {
                 "columns": [
@@ -555,7 +698,7 @@
                 "pixCode": {
                   "codecId": "pg/text@1",
                   "dataType": "pg/text",
-                  "nullable": false
+                  "nullable": true
                 },
                 "rawResponse": {
                   "codecId": "pg/jsonb@1",
@@ -563,9 +706,18 @@
                   "nullable": false
                 },
                 "status": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
+                  "codecId": "pg/enum@1",
+                  "dataType": "pg/enum",
+                  "nullable": false,
+                  "typeParams": {
+                    "typeName": "PaymentStatus"
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "PaymentStatus",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
                 },
                 "updatedAt": {
                   "codecId": "pg/timestamp-date@1",
@@ -576,7 +728,26 @@
                   }
                 }
               },
-              "foreignKeys": [],
+              "foreignKeys": [
+                {
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "orderId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Payment"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Order"
+                  }
+                }
+              ],
               "indexes": [
                 {
                   "columns": [
@@ -612,11 +783,11 @@
                   "dataType": "pg/enum",
                   "nullable": false,
                   "typeParams": {
-                    "typeName": "status"
+                    "typeName": "PaymentStatus"
                   },
                   "valueSet": {
                     "entityKind": "valueSet",
-                    "entityName": "status",
+                    "entityName": "PaymentStatus",
                     "namespaceId": "public",
                     "plane": "storage"
                   }
@@ -631,22 +802,55 @@
                   "dataType": "pg/text",
                   "nullable": false
                 },
+                "source": {
+                  "codecId": "pg/enum@1",
+                  "dataType": "pg/enum",
+                  "nullable": false,
+                  "typeParams": {
+                    "typeName": "Source"
+                  },
+                  "valueSet": {
+                    "entityKind": "valueSet",
+                    "entityName": "Source",
+                    "namespaceId": "public",
+                    "plane": "storage"
+                  }
+                },
                 "toStatus": {
                   "codecId": "pg/enum@1",
                   "dataType": "pg/enum",
                   "nullable": false,
                   "typeParams": {
-                    "typeName": "status"
+                    "typeName": "PaymentStatus"
                   },
                   "valueSet": {
                     "entityKind": "valueSet",
-                    "entityName": "status",
+                    "entityName": "PaymentStatus",
                     "namespaceId": "public",
                     "plane": "storage"
                   }
                 }
               },
-              "foreignKeys": [],
+              "foreignKeys": [
+                {
+                  "onDelete": "restrict",
+                  "onUpdate": "cascade",
+                  "source": {
+                    "columns": [
+                      "paymentId"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "PaymentEvent"
+                  },
+                  "target": {
+                    "columns": [
+                      "id"
+                    ],
+                    "namespaceId": "public",
+                    "tableName": "Payment"
+                  }
+                }
+              ],
               "indexes": [],
               "primaryKey": {
                 "columns": [
@@ -655,55 +859,7 @@
               },
               "uniques": []
             },
-            "User": {
-              "columns": {
-                "email": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                },
-                "id": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                },
-                "name": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                },
-                "password": {
-                  "codecId": "pg/text@1",
-                  "dataType": "pg/text",
-                  "nullable": false
-                },
-                "phone_number": {
-                  "codecId": "sql/varchar@1",
-                  "dataType": "pg/varchar",
-                  "nullable": false,
-                  "typeParams": {
-                    "length": 100
-                  }
-                }
-              },
-              "foreignKeys": [],
-              "indexes": [
-                {
-                  "columns": [
-                    "email"
-                  ],
-                  "name": "User_email_key",
-                  "unique": true
-                }
-              ],
-              "primaryKey": {
-                "columns": [
-                  "id"
-                ]
-              },
-              "uniques": []
-            },
-            "product": {
+            "Product": {
               "columns": {
                 "active": {
                   "codecId": "pg/bool@1",
@@ -744,16 +900,85 @@
                 ]
               },
               "uniques": []
+            },
+            "User": {
+              "columns": {
+                "email": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "id": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "name": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "password": {
+                  "codecId": "pg/text@1",
+                  "dataType": "pg/text",
+                  "nullable": false
+                },
+                "phoneNumber": {
+                  "codecId": "sql/varchar@1",
+                  "dataType": "pg/varchar",
+                  "nullable": false,
+                  "typeParams": {
+                    "length": 100
+                  }
+                }
+              },
+              "foreignKeys": [],
+              "indexes": [
+                {
+                  "columns": [
+                    "email"
+                  ],
+                  "name": "User_email_key",
+                  "unique": true
+                }
+              ],
+              "primaryKey": {
+                "columns": [
+                  "id"
+                ]
+              },
+              "uniques": []
             }
           },
           "valueSet": {
-            "status": {
+            "OrderStatus": {
               "kind": "valueSet",
               "values": [
-                "CART",
-                "AWAITING_SELLER_CONFIRMATION",
-                "CONFIRMED",
-                "REJECTED"
+                "PENDING",
+                "PAID",
+                "FAILED",
+                "CANCELED"
+              ]
+            },
+            "PaymentStatus": {
+              "kind": "valueSet",
+              "values": [
+                "PENDING",
+                "APPROVED",
+                "FAILED",
+                "EXPIRED",
+                "CANCELED",
+                "REFUNDED",
+                "DECLINED"
+              ]
+            },
+            "Source": {
+              "kind": "valueSet",
+              "values": [
+                "WEBHOOK",
+                "POLLING",
+                "SIMULATION",
+                "SYSTEM"
               ]
             }
           }
@@ -762,10 +987,10 @@
         "kind": "postgres-schema"
       }
     },
-    "storageHash": "2cc2a89afc208fd01a0c93f4c2cb0cc2b150776d8ec35f8ae09be587f1cd35ef"
+    "storageHash": "5cc5e33c5e888a60cb8978e393c90715ea4e365162180c04f63468393cd80f3e"
   },
   "execution": {
-    "executionHash": "3ce936ce2b189d45012ffa886040b0cd97a4cf5be3bf96564366e0de3fd59fca",
+    "executionHash": "33a344fccf9e03156c9d70e178f228c422f5da31d9f53af448cb80b23d1029e0",
     "mutations": {
       "defaults": [
         {
@@ -891,7 +1116,7 @@
             "kind": "generator"
           },
           "ref": {
-            "entry": "User",
+            "entry": "Product",
             "field": "id",
             "namespace": "public"
           }
@@ -902,7 +1127,7 @@
             "kind": "generator"
           },
           "ref": {
-            "entry": "product",
+            "entry": "User",
             "field": "id",
             "namespace": "public"
           }

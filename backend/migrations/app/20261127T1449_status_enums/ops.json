@@ -1,0 +1,456 @@
+[
+  {
+    "id": "alterType.Order.status",
+    "label": "Alter type of \"Order\".\"status\" to text",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "status",
+        "table": "Order"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"status\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Order",
+          "status"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"status\" on \"Order\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"status\" to text",
+        "sql": "ALTER TABLE \"public\".\"Order\" ALTER COLUMN \"status\" TYPE text USING \"status\"::text",
+        "meta": {
+          "convertedColumn": {
+            "table": "Order",
+            "column": "status",
+            "by": "conversion"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"status\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "Order",
+          "status",
+          "text"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterType.PaymentEvent.fromStatus",
+    "label": "Alter type of \"PaymentEvent\".\"fromStatus\" to text",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "fromStatus",
+        "table": "PaymentEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"fromStatus\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "PaymentEvent",
+          "fromStatus"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"fromStatus\" on \"PaymentEvent\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"fromStatus\" to text",
+        "sql": "ALTER TABLE \"public\".\"PaymentEvent\" ALTER COLUMN \"fromStatus\" TYPE text USING \"fromStatus\"::text",
+        "meta": {
+          "convertedColumn": {
+            "table": "PaymentEvent",
+            "column": "fromStatus",
+            "by": "conversion"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"fromStatus\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "PaymentEvent",
+          "fromStatus",
+          "text"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterType.PaymentEvent.toStatus",
+    "label": "Alter type of \"PaymentEvent\".\"toStatus\" to text",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "toStatus",
+        "table": "PaymentEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"toStatus\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "PaymentEvent",
+          "toStatus"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"toStatus\" on \"PaymentEvent\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"toStatus\" to text",
+        "sql": "ALTER TABLE \"public\".\"PaymentEvent\" ALTER COLUMN \"toStatus\" TYPE text USING \"toStatus\"::text",
+        "meta": {
+          "convertedColumn": {
+            "table": "PaymentEvent",
+            "column": "toStatus",
+            "by": "conversion"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"toStatus\" has type \"text\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" INNER JOIN \"pg_class\" AS \"c\" ON \"c\".\"oid\" = \"a\".\"attrelid\" INNER JOIN \"pg_namespace\" AS \"n\" ON \"n\".\"oid\" = \"c\".\"relnamespace\" WHERE (\"n\".\"nspname\" = $1 AND \"c\".\"relname\" = $2 AND \"a\".\"attname\" = $3 AND (format_type(\"a\".\"atttypid\", \"a\".\"atttypmod\")) = $4 AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "public",
+          "PaymentEvent",
+          "toStatus",
+          "text"
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "dropNativeEnumType.status",
+    "label": "Drop enum type \"status\"",
+    "operationClass": "widening",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "status"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "drop enum type \"status\"",
+        "sql": "DROP TYPE \"public\".\"status\"",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.status",
+    "label": "Create enum type \"status\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "status"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"status\"",
+        "sql": "CREATE TYPE \"public\".\"status\" AS ENUM ('AWAITING_PAYMENT', 'PAYMENT_CONFIRMED', 'PROCESSING', 'OUT_FOR_DELIVERY', 'DELIVERED', 'IN_TRANSIT', 'RETURNED', 'CANCELED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "createNativeEnumType.paymentStatus",
+    "label": "Create enum type \"paymentStatus\"",
+    "operationClass": "additive",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "type",
+        "name": "paymentStatus"
+      }
+    },
+    "precheck": [],
+    "execute": [
+      {
+        "description": "create enum type \"paymentStatus\"",
+        "sql": "CREATE TYPE \"public\".\"paymentStatus\" AS ENUM ('PENDING', 'IN_ANALYSIS', 'APPROVED', 'FAILED', 'EXPIRED', 'CANCELED', 'REFUNDED', 'DISPUTED')",
+        "params": []
+      }
+    ],
+    "postcheck": []
+  },
+  {
+    "id": "alterType.Order.status",
+    "label": "Alter type of \"Order\".\"status\" to \"status\"",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "status",
+        "table": "Order"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"status\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Order",
+          "status"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"status\" on \"Order\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"status\" to \"status\"",
+        "sql": "ALTER TABLE \"public\".\"Order\" ALTER COLUMN \"status\" TYPE \"status\" USING \"status\"::\"status\""
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"status\" has type \"status\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" WHERE (\"a\".\"attrelid\" = to_regclass($1) AND \"a\".\"attname\" = $2 AND \"a\".\"atttypid\" = to_regtype($3) AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "\"public\".\"Order\"",
+          "status",
+          "\"status\""
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterType.Payment.status",
+    "label": "Alter type of \"Payment\".\"status\" to \"paymentStatus\"",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "status",
+        "table": "Payment"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"status\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "Payment",
+          "status"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"status\" on \"Payment\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"status\" to \"paymentStatus\"",
+        "sql": "ALTER TABLE \"public\".\"Payment\" ALTER COLUMN \"status\" TYPE \"paymentStatus\" USING \"status\"::\"paymentStatus\"",
+        "meta": {
+          "convertedColumn": {
+            "table": "Payment",
+            "column": "status",
+            "by": "conversion"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"status\" has type \"paymentStatus\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" WHERE (\"a\".\"attrelid\" = to_regclass($1) AND \"a\".\"attname\" = $2 AND \"a\".\"atttypid\" = to_regtype($3) AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "\"public\".\"Payment\"",
+          "status",
+          "\"paymentStatus\""
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterType.PaymentEvent.fromStatus",
+    "label": "Alter type of \"PaymentEvent\".\"fromStatus\" to \"paymentStatus\"",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "fromStatus",
+        "table": "PaymentEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"fromStatus\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "PaymentEvent",
+          "fromStatus"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"fromStatus\" on \"PaymentEvent\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"fromStatus\" to \"paymentStatus\"",
+        "sql": "ALTER TABLE \"public\".\"PaymentEvent\" ALTER COLUMN \"fromStatus\" TYPE \"paymentStatus\" USING \"fromStatus\"::\"paymentStatus\"",
+        "meta": {
+          "convertedColumn": {
+            "table": "PaymentEvent",
+            "column": "fromStatus",
+            "by": "conversion"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"fromStatus\" has type \"paymentStatus\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" WHERE (\"a\".\"attrelid\" = to_regclass($1) AND \"a\".\"attname\" = $2 AND \"a\".\"atttypid\" = to_regtype($3) AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "\"public\".\"PaymentEvent\"",
+          "fromStatus",
+          "\"paymentStatus\""
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  },
+  {
+    "id": "alterType.PaymentEvent.toStatus",
+    "label": "Alter type of \"PaymentEvent\".\"toStatus\" to \"paymentStatus\"",
+    "operationClass": "data",
+    "target": {
+      "id": "postgres",
+      "details": {
+        "schema": "public",
+        "objectType": "column",
+        "name": "toStatus",
+        "table": "PaymentEvent"
+      }
+    },
+    "precheck": [
+      {
+        "description": "ensure column \"toStatus\" exists",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"information_schema\".\"columns\" WHERE (\"table_schema\" = $1 AND \"table_name\" = $2 AND \"column_name\" = $3)) AS \"result\"",
+        "params": [
+          "public",
+          "PaymentEvent",
+          "toStatus"
+        ],
+        "expectation": {
+          "expects": "present",
+          "object": "column \"toStatus\" on \"PaymentEvent\""
+        }
+      }
+    ],
+    "execute": [
+      {
+        "description": "alter type of \"toStatus\" to \"paymentStatus\"",
+        "sql": "ALTER TABLE \"public\".\"PaymentEvent\" ALTER COLUMN \"toStatus\" TYPE \"paymentStatus\" USING \"toStatus\"::\"paymentStatus\"",
+        "meta": {
+          "convertedColumn": {
+            "table": "PaymentEvent",
+            "column": "toStatus",
+            "by": "conversion"
+          }
+        }
+      }
+    ],
+    "postcheck": [
+      {
+        "description": "verify column \"toStatus\" has type \"paymentStatus\"",
+        "sql": "SELECT EXISTS (SELECT 1 AS \"one\" FROM \"pg_attribute\" AS \"a\" WHERE (\"a\".\"attrelid\" = to_regclass($1) AND \"a\".\"attname\" = $2 AND \"a\".\"atttypid\" = to_regtype($3) AND NOT (\"a\".\"attisdropped\"))) AS \"result\"",
+        "params": [
+          "\"public\".\"PaymentEvent\"",
+          "toStatus",
+          "\"paymentStatus\""
+        ]
+      }
+    ],
+    "meta": {
+      "warning": "TABLE_REWRITE"
+    }
+  }
+]

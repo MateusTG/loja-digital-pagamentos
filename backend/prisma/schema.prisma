@@ -7,37 +7,38 @@ datasource db {
     url      = env("DATABASE_URL")
 }
 
-enum status {
-    AWAITING_PAYMENT
-    PAYMENT_CONFIRMED
-    PROCESSING
-    OUT_FOR_DELIVERY
-    DELIVERED
-    IN_TRANSIT
-    RETURNED
+enum OrderStatus {
+    PENDING
+    PAID
+    FAILED
     CANCELED
 }
 
-enum paymentStatus{
+enum PaymentStatus {
     PENDING
-    IN_ANALYSIS
     APPROVED
     FAILED
     EXPIRED
     CANCELED
     REFUNDED
-    DISPUTED
+    DECLINED
+}
+enum Source {
+    WEBHOOK
+    POLLING
+    SIMULATION
+    SYSTEM
 }
 
 model User {
     id           String  @id @default(uuid())
     name         String
-    phone_number String  @db.VarChar(100)
+    phoneNumber String  @db.VarChar(100)
     email        String  @unique
     password     String
 }
 
-model product {
+model Product {
     id           String  @id @default(uuid())
     name         String
     description  String  
@@ -49,12 +50,15 @@ model product {
 
 model Order {
     id          String  @id @default(uuid())
-    orderId     String
+    userId      String
     productId   String  
-    amountCents Float   
-    status      status  
+    amountCents Int   
+    status      OrderStatus  
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
+
+    user        User    @relation(fields: [userId], references: [id])
+    product     Product @relation(fields: [productId], references: [id])
 }
 
 model Payment {
@@ -62,17 +66,22 @@ model Payment {
     orderId     String
     gatewayId   String  @unique
     method      String
-    status      paymentStatus
-    pixCode     String
+    status      PaymentStatus
+    pixCode     String?
     rawResponse Json
     createdAt   DateTime @default(now())
     updatedAt   DateTime @updatedAt
+
+    order       Order   @relation(fields: [orderId], references: [id])
 }
 
 model PaymentEvent {
     id          String @id @default(uuid())
     paymentId   String
-    fromStatus  paymentStatus
-    toStatus    paymentStatus
+    fromStatus  PaymentStatus
+    toStatus    PaymentStatus
+    source      Source
     createdAt   DateTime @default(now())
+
+    payment     Payment @relation(fields: [paymentId], references: [id])
 }

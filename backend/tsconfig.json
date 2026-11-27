@@ -44,5 +44,5 @@
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
   },
-  "include": ["src", "prisma.config.ts"]
+  "include": ["src", "prisma", "prisma.config.ts"]
 }

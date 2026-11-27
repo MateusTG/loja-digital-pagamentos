@@ -18,9 +18,9 @@ import type {
 } from '@prisma/orm-postgres/contract-types';
 
 export type StorageHash =
-  StorageHashBase<'2cc2a89afc208fd01a0c93f4c2cb0cc2b150776d8ec35f8ae09be587f1cd35ef'>;
+  StorageHashBase<'5cc5e33c5e888a60cb8978e393c90715ea4e365162180c04f63468393cd80f3e'>;
 export type ExecutionHash =
-  ExecutionHashBase<'3ce936ce2b189d45012ffa886040b0cd97a4cf5be3bf96564366e0de3fd59fca'>;
+  ExecutionHashBase<'33a344fccf9e03156c9d70e178f228c422f5da31d9f53af448cb80b23d1029e0'>;
 export type ProfileHash =
   ProfileHashBase<'3916f444a8a17ad749191acf9e08dad97d1a327b88c2f1d45d12f240296aa8b2'>;
 
@@ -275,18 +275,34 @@ type FieldTypeOverrides = {
     readonly models: {
       readonly Order: {
         readonly status: {
-          readonly output: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
-          readonly input: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+          readonly output: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED';
+          readonly input: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED';
+        };
+      };
+      readonly Payment: {
+        readonly status: {
+          readonly output:
+            'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+          readonly input:
+            'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
         };
       };
       readonly PaymentEvent: {
         readonly fromStatus: {
-          readonly output: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
-          readonly input: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+          readonly output:
+            'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+          readonly input:
+            'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+        };
+        readonly source: {
+          readonly output: 'WEBHOOK' | 'POLLING' | 'SIMULATION' | 'SYSTEM';
+          readonly input: 'WEBHOOK' | 'POLLING' | 'SIMULATION' | 'SYSTEM';
         };
         readonly toStatus: {
-          readonly output: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
-          readonly input: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+          readonly output:
+            'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+          readonly input:
+            'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
         };
       };
     };
@@ -312,18 +328,34 @@ type ColumnTypeOverrides = {
   readonly public: {
     readonly Order: {
       readonly status: {
-        readonly output: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
-        readonly input: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+        readonly output: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED';
+        readonly input: 'PENDING' | 'PAID' | 'FAILED' | 'CANCELED';
+      };
+    };
+    readonly Payment: {
+      readonly status: {
+        readonly output:
+          'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+        readonly input:
+          'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
       };
     };
     readonly PaymentEvent: {
       readonly fromStatus: {
-        readonly output: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
-        readonly input: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+        readonly output:
+          'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+        readonly input:
+          'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+      };
+      readonly source: {
+        readonly output: 'WEBHOOK' | 'POLLING' | 'SIMULATION' | 'SYSTEM';
+        readonly input: 'WEBHOOK' | 'POLLING' | 'SIMULATION' | 'SYSTEM';
       };
       readonly toStatus: {
-        readonly output: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
-        readonly input: 'CART' | 'AWAITING_SELLER_CONFIRMATION' | 'CONFIRMED' | 'REJECTED';
+        readonly output:
+          'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
+        readonly input:
+          'PENDING' | 'APPROVED' | 'FAILED' | 'EXPIRED' | 'CANCELED' | 'REFUNDED' | 'DECLINED';
       };
     };
   };
@@ -348,11 +380,13 @@ export namespace Models {
     amountCents: FieldOutputTypes['public']['Order']['amountCents'];
     createdAt: FieldOutputTypes['public']['Order']['createdAt'];
     id: FieldOutputTypes['public']['Order']['id'];
-    orderId: FieldOutputTypes['public']['Order']['orderId'];
     productId: FieldOutputTypes['public']['Order']['productId'];
     status: FieldOutputTypes['public']['Order']['status'];
     updatedAt: FieldOutputTypes['public']['Order']['updatedAt'];
-    readonly [RelationKeys]?: never;
+    userId: FieldOutputTypes['public']['Order']['userId'];
+    product: public_Product;
+    user: public_User;
+    readonly [RelationKeys]?: 'product' | 'user';
   };
   export type public_Payment = {
     createdAt: FieldOutputTypes['public']['Payment']['createdAt'];
@@ -364,14 +398,26 @@ export namespace Models {
     rawResponse: FieldOutputTypes['public']['Payment']['rawResponse'];
     status: FieldOutputTypes['public']['Payment']['status'];
     updatedAt: FieldOutputTypes['public']['Payment']['updatedAt'];
-    readonly [RelationKeys]?: never;
+    order: public_Order;
+    readonly [RelationKeys]?: 'order';
   };
   export type public_PaymentEvent = {
     createdAt: FieldOutputTypes['public']['PaymentEvent']['createdAt'];
     fromStatus: FieldOutputTypes['public']['PaymentEvent']['fromStatus'];
     id: FieldOutputTypes['public']['PaymentEvent']['id'];
     paymentId: FieldOutputTypes['public']['PaymentEvent']['paymentId'];
+    source: FieldOutputTypes['public']['PaymentEvent']['source'];
     toStatus: FieldOutputTypes['public']['PaymentEvent']['toStatus'];
+    payment: public_Payment;
+    readonly [RelationKeys]?: 'payment';
+  };
+  export type public_Product = {
+    active: FieldOutputTypes['public']['Product']['active'];
+    description: FieldOutputTypes['public']['Product']['description'];
+    id: FieldOutputTypes['public']['Product']['id'];
+    imageUrl: FieldOutputTypes['public']['Product']['imageUrl'];
+    name: FieldOutputTypes['public']['Product']['name'];
+    priceCents: FieldOutputTypes['public']['Product']['priceCents'];
     readonly [RelationKeys]?: never;
   };
   export type public_User = {
@@ -379,16 +425,7 @@ export namespace Models {
     id: FieldOutputTypes['public']['User']['id'];
     name: FieldOutputTypes['public']['User']['name'];
     password: FieldOutputTypes['public']['User']['password'];
-    phone_number: FieldOutputTypes['public']['User']['phone_number'];
-    readonly [RelationKeys]?: never;
-  };
-  export type public_product = {
-    active: FieldOutputTypes['public']['product']['active'];
-    description: FieldOutputTypes['public']['product']['description'];
-    id: FieldOutputTypes['public']['product']['id'];
-    imageUrl: FieldOutputTypes['public']['product']['imageUrl'];
-    name: FieldOutputTypes['public']['product']['name'];
-    priceCents: FieldOutputTypes['public']['product']['priceCents'];
+    phoneNumber: FieldOutputTypes['public']['User']['phoneNumber'];
     readonly [RelationKeys]?: never;
   };
 }
@@ -398,8 +435,8 @@ export declare const models: {
     Order: Models.public_Order;
     Payment: Models.public_Payment;
     PaymentEvent: Models.public_PaymentEvent;
+    Product: Models.public_Product;
     User: Models.public_User;
-    product: Models.public_product;
   };
 };
 
@@ -424,8 +461,8 @@ type ContractBase = Omit<
             readonly Order: {
               columns: {
                 readonly amountCents: {
-                  readonly dataType: 'pg/float8';
-                  readonly codecId: 'pg/float8@1';
+                  readonly dataType: 'pg/int4';
+                  readonly codecId: 'pg/int4@1';
                   readonly nullable: false;
                   readonly many: false;
                 };
@@ -443,12 +480,6 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
-                readonly orderId: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
                 readonly productId: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
@@ -459,7 +490,7 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/enum';
                   readonly codecId: 'pg/enum@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly typeName: 'status' };
+                  readonly typeParams: { readonly typeName: 'OrderStatus' };
                   readonly many: false;
                 };
                 readonly updatedAt: {
@@ -469,11 +500,42 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                   readonly many: false;
                 };
+                readonly userId: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
               indexes: readonly [];
-              foreignKeys: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Order';
+                    readonly columns: readonly ['userId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'User';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Order';
+                    readonly columns: readonly ['productId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Product';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
             };
             readonly Payment: {
               columns: {
@@ -512,7 +574,7 @@ type ContractBase = Omit<
                 readonly pixCode: {
                   readonly dataType: 'pg/text';
                   readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
+                  readonly nullable: true;
                   readonly many: false;
                 };
                 readonly rawResponse: {
@@ -522,9 +584,10 @@ type ContractBase = Omit<
                   readonly many: false;
                 };
                 readonly status: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
                   readonly nullable: false;
+                  readonly typeParams: { readonly typeName: 'PaymentStatus' };
                   readonly many: false;
                 };
                 readonly updatedAt: {
@@ -544,7 +607,20 @@ type ContractBase = Omit<
                   readonly unique: true;
                 },
               ];
-              foreignKeys: readonly [];
+              foreignKeys: readonly [
+                {
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Payment';
+                    readonly columns: readonly ['orderId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Order';
+                    readonly columns: readonly ['id'];
+                  };
+                },
+              ];
             };
             readonly PaymentEvent: {
               columns: {
@@ -560,7 +636,7 @@ type ContractBase = Omit<
                   readonly dataType: 'pg/enum';
                   readonly codecId: 'pg/enum@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly typeName: 'status' };
+                  readonly typeParams: { readonly typeName: 'PaymentStatus' };
                   readonly many: false;
                 };
                 readonly id: {
@@ -575,65 +651,40 @@ type ContractBase = Omit<
                   readonly nullable: false;
                   readonly many: false;
                 };
+                readonly source: {
+                  readonly dataType: 'pg/enum';
+                  readonly codecId: 'pg/enum@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly typeName: 'Source' };
+                  readonly many: false;
+                };
                 readonly toStatus: {
                   readonly dataType: 'pg/enum';
                   readonly codecId: 'pg/enum@1';
                   readonly nullable: false;
-                  readonly typeParams: { readonly typeName: 'status' };
+                  readonly typeParams: { readonly typeName: 'PaymentStatus' };
                   readonly many: false;
                 };
               };
               primaryKey: { readonly columns: readonly ['id'] };
               uniques: readonly [];
               indexes: readonly [];
-              foreignKeys: readonly [];
-            };
-            readonly User: {
-              columns: {
-                readonly email: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly id: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly name: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly password: {
-                  readonly dataType: 'pg/text';
-                  readonly codecId: 'pg/text@1';
-                  readonly nullable: false;
-                  readonly many: false;
-                };
-                readonly phone_number: {
-                  readonly dataType: 'pg/varchar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly nullable: false;
-                  readonly typeParams: { readonly length: 100 };
-                  readonly many: false;
-                };
-              };
-              primaryKey: { readonly columns: readonly ['id'] };
-              uniques: readonly [];
-              indexes: readonly [
+              foreignKeys: readonly [
                 {
-                  readonly name: 'User_email_key';
-                  readonly columns: readonly ['email'];
-                  readonly unique: true;
+                  readonly source: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'PaymentEvent';
+                    readonly columns: readonly ['paymentId'];
+                  };
+                  readonly target: {
+                    readonly namespaceId: 'public' & NamespaceId;
+                    readonly tableName: 'Payment';
+                    readonly columns: readonly ['id'];
+                  };
                 },
               ];
-              foreignKeys: readonly [];
             };
-            readonly product: {
+            readonly Product: {
               columns: {
                 readonly active: {
                   readonly dataType: 'pg/bool';
@@ -677,16 +728,72 @@ type ContractBase = Omit<
               indexes: readonly [];
               foreignKeys: readonly [];
             };
+            readonly User: {
+              columns: {
+                readonly email: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly id: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly name: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly password: {
+                  readonly dataType: 'pg/text';
+                  readonly codecId: 'pg/text@1';
+                  readonly nullable: false;
+                  readonly many: false;
+                };
+                readonly phoneNumber: {
+                  readonly dataType: 'pg/varchar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly nullable: false;
+                  readonly typeParams: { readonly length: 100 };
+                  readonly many: false;
+                };
+              };
+              primaryKey: { readonly columns: readonly ['id'] };
+              uniques: readonly [];
+              indexes: readonly [
+                {
+                  readonly name: 'User_email_key';
+                  readonly columns: readonly ['email'];
+                  readonly unique: true;
+                },
+              ];
+              foreignKeys: readonly [];
+            };
           };
           readonly valueSet: {
-            readonly status: {
+            readonly OrderStatus: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['PENDING', 'PAID', 'FAILED', 'CANCELED'];
+            };
+            readonly PaymentStatus: {
               readonly kind: 'valueSet';
               readonly values: readonly [
-                'CART',
-                'AWAITING_SELLER_CONFIRMATION',
-                'CONFIRMED',
-                'REJECTED',
+                'PENDING',
+                'APPROVED',
+                'FAILED',
+                'EXPIRED',
+                'CANCELED',
+                'REFUNDED',
+                'DECLINED',
               ];
+            };
+            readonly Source: {
+              readonly kind: 'valueSet';
+              readonly values: readonly ['WEBHOOK', 'POLLING', 'SIMULATION', 'SYSTEM'];
             };
           };
         };
@@ -705,8 +812,8 @@ type ContractBase = Omit<
       readonly namespace: 'public' & NamespaceId;
       readonly model: 'PaymentEvent';
     };
+    readonly Product: { readonly namespace: 'public' & NamespaceId; readonly model: 'Product' };
     readonly User: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
-    readonly product: { readonly namespace: 'public' & NamespaceId; readonly model: 'product' };
   };
   readonly domain: {
     readonly namespaces: {
@@ -716,7 +823,7 @@ type ContractBase = Omit<
             readonly fields: {
               readonly amountCents: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/float8@1' };
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/int4@1' };
               };
               readonly createdAt: {
                 readonly nullable: false;
@@ -730,10 +837,6 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
-              readonly orderId: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
               readonly productId: {
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
@@ -743,7 +846,7 @@ type ContractBase = Omit<
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/enum@1';
-                  readonly typeParams: { readonly typeName: 'status' };
+                  readonly typeParams: { readonly typeName: 'OrderStatus' };
                 };
               };
               readonly updatedAt: {
@@ -754,8 +857,34 @@ type ContractBase = Omit<
                   readonly typeParams: { readonly precision: 3 };
                 };
               };
+              readonly userId: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly product: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Product';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['productId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+              readonly user: {
+                readonly to: { readonly namespace: 'public' & NamespaceId; readonly model: 'User' };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['userId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'Order';
               readonly namespaceId: 'public';
@@ -763,10 +892,10 @@ type ContractBase = Omit<
                 readonly amountCents: { readonly column: 'amountCents' };
                 readonly createdAt: { readonly column: 'createdAt' };
                 readonly id: { readonly column: 'id' };
-                readonly orderId: { readonly column: 'orderId' };
                 readonly productId: { readonly column: 'productId' };
                 readonly status: { readonly column: 'status' };
                 readonly updatedAt: { readonly column: 'updatedAt' };
+                readonly userId: { readonly column: 'userId' };
               };
             };
           };
@@ -797,7 +926,7 @@ type ContractBase = Omit<
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly pixCode: {
-                readonly nullable: false;
+                readonly nullable: true;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
               readonly rawResponse: {
@@ -806,7 +935,11 @@ type ContractBase = Omit<
               };
               readonly status: {
                 readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'PaymentStatus' };
+                };
               };
               readonly updatedAt: {
                 readonly nullable: false;
@@ -817,7 +950,20 @@ type ContractBase = Omit<
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly order: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Order';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['orderId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'Payment';
               readonly namespaceId: 'public';
@@ -849,7 +995,7 @@ type ContractBase = Omit<
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/enum@1';
-                  readonly typeParams: { readonly typeName: 'status' };
+                  readonly typeParams: { readonly typeName: 'PaymentStatus' };
                 };
               };
               readonly id: {
@@ -860,16 +1006,37 @@ type ContractBase = Omit<
                 readonly nullable: false;
                 readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
               };
+              readonly source: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'pg/enum@1';
+                  readonly typeParams: { readonly typeName: 'Source' };
+                };
+              };
               readonly toStatus: {
                 readonly nullable: false;
                 readonly type: {
                   readonly kind: 'scalar';
                   readonly codecId: 'pg/enum@1';
-                  readonly typeParams: { readonly typeName: 'status' };
+                  readonly typeParams: { readonly typeName: 'PaymentStatus' };
                 };
               };
             };
-            readonly relations: Record<string, never>;
+            readonly relations: {
+              readonly payment: {
+                readonly to: {
+                  readonly namespace: 'public' & NamespaceId;
+                  readonly model: 'Payment';
+                };
+                readonly cardinality: 'N:1';
+                readonly nullable: false;
+                readonly on: {
+                  readonly localFields: readonly ['paymentId'];
+                  readonly targetFields: readonly ['id'];
+                };
+              };
+            };
             readonly storage: {
               readonly table: 'PaymentEvent';
               readonly namespaceId: 'public';
@@ -878,51 +1045,12 @@ type ContractBase = Omit<
                 readonly fromStatus: { readonly column: 'fromStatus' };
                 readonly id: { readonly column: 'id' };
                 readonly paymentId: { readonly column: 'paymentId' };
+                readonly source: { readonly column: 'source' };
                 readonly toStatus: { readonly column: 'toStatus' };
               };
             };
           };
-          readonly User: {
-            readonly fields: {
-              readonly email: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly id: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly name: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly password: {
-                readonly nullable: false;
-                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
-              };
-              readonly phone_number: {
-                readonly nullable: false;
-                readonly type: {
-                  readonly kind: 'scalar';
-                  readonly codecId: 'sql/varchar@1';
-                  readonly typeParams: { readonly length: 100 };
-                };
-              };
-            };
-            readonly relations: Record<string, never>;
-            readonly storage: {
-              readonly table: 'User';
-              readonly namespaceId: 'public';
-              readonly fields: {
-                readonly email: { readonly column: 'email' };
-                readonly id: { readonly column: 'id' };
-                readonly name: { readonly column: 'name' };
-                readonly password: { readonly column: 'password' };
-                readonly phone_number: { readonly column: 'phone_number' };
-              };
-            };
-          };
-          readonly product: {
+          readonly Product: {
             readonly fields: {
               readonly active: {
                 readonly nullable: false;
@@ -951,7 +1079,7 @@ type ContractBase = Omit<
             };
             readonly relations: Record<string, never>;
             readonly storage: {
-              readonly table: 'product';
+              readonly table: 'Product';
               readonly namespaceId: 'public';
               readonly fields: {
                 readonly active: { readonly column: 'active' };
@@ -960,6 +1088,46 @@ type ContractBase = Omit<
                 readonly imageUrl: { readonly column: 'imageUrl' };
                 readonly name: { readonly column: 'name' };
                 readonly priceCents: { readonly column: 'priceCents' };
+              };
+            };
+          };
+          readonly User: {
+            readonly fields: {
+              readonly email: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly id: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly name: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly password: {
+                readonly nullable: false;
+                readonly type: { readonly kind: 'scalar'; readonly codecId: 'pg/text@1' };
+              };
+              readonly phoneNumber: {
+                readonly nullable: false;
+                readonly type: {
+                  readonly kind: 'scalar';
+                  readonly codecId: 'sql/varchar@1';
+                  readonly typeParams: { readonly length: 100 };
+                };
+              };
+            };
+            readonly relations: Record<string, never>;
+            readonly storage: {
+              readonly table: 'User';
+              readonly namespaceId: 'public';
+              readonly fields: {
+                readonly email: { readonly column: 'email' };
+                readonly id: { readonly column: 'id' };
+                readonly name: { readonly column: 'name' };
+                readonly password: { readonly column: 'password' };
+                readonly phoneNumber: { readonly column: 'phoneNumber' };
               };
             };
           };
@@ -1100,7 +1268,7 @@ type ContractBase = Omit<
         {
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {
-            readonly entry: 'User';
+            readonly entry: 'Product';
             readonly field: 'id';
             readonly namespace: 'public';
           };
@@ -1108,7 +1276,7 @@ type ContractBase = Omit<
         {
           readonly onCreate: { readonly id: 'uuidv4'; readonly kind: 'generator' };
           readonly ref: {
-            readonly entry: 'product';
+            readonly entry: 'User';
             readonly field: 'id';
             readonly namespace: 'public';
           };
