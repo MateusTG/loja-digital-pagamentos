@@ -1,28 +1,31 @@
-import type { Request, Response, NextFunction } from 'express';
+import type { Express, Request, Response, NextFunction } from 'express';
+import { ZodError } from 'zod';
+import { AppError, GatewayError } from '../lib/error';
 
-function errorHandler(err:any, req:Request, res:Response, next:NextFunction) {
-    console.error(err);
-    res.status(500).json({ error: 'Internal Server Error' });
-}
-
-function notFoundHandler(req:Request, res:Response, next:NextFunction) {
-    res.status(404).json({ error: 'Not Found' });
-}
-
-function appErrorHandler(app:any) {
-    app.use(errorHandler);
-    app.use(notFoundHandler);
-}
-
-function zodErrorHandler(err:any, req:Request, res:Response, next:NextFunction) {
-    if (err.name === 'ZodError') {
-        res.status(400).json({ error: err.errors });
-    } else {
-        next(err);
+function errorHandler(err: unknown, _req: Request, res: Response, _next: NextFunction) {
+    if (err instanceof ZodError) {
+        res.status(400).json({ error: 'VALIDATION_ERROR', issues: err.issues });
+        return;
     }
+    if (err instanceof AppError) {
+        if (err instanceof GatewayError) {
+            // Detalhes do gateway ficam só no log (nunca contêm o header Authorization).
+            console.error(`[gateway] ${err.code} (status do gateway: ${err.gatewayStatus ?? '-'})`, err.details ?? '');
+        }
+        res.status(err.statusCode).json({ error: err.code, message: err.message });
+        return;
+    }
+    console.error(err);
+    res.status(500).json({ error: 'INTERNAL_ERROR', message: 'Erro interno' });
 }
 
-function genericErrorHandler(err:any, req:Request, res:Response, next:NextFunction) {
-    res.status(500).json({ error: 'Internal Server Error' });
+function notFoundHandler(_req: Request, res: Response) {
+    res.status(404).json({ error: 'NOT_FOUND', message: 'Rota não encontrada' });
 }
-export { errorHandler, notFoundHandler, appErrorHandler, zodErrorHandler, genericErrorHandler };
+
+function appErrorHandler(app: Express) {
+    app.use(notFoundHandler);
+    app.use(errorHandler);
+}
+
+export { errorHandler, notFoundHandler, appErrorHandler };
